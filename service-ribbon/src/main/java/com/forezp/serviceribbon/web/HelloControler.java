@@ -2,9 +2,7 @@ package com.forezp.serviceribbon.web;
 
 import com.forezp.serviceribbon.service.HelloService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * Email miles02@163.com
@@ -18,8 +16,9 @@ public class HelloControler {
     @Autowired
     HelloService helloService;
 
-    @GetMapping(value = "/hi")
-    public String hi(@RequestParam String name) {
+    @RequestMapping (value = "/hi")
+    public String hi(@RequestParam String name,@RequestBody String sign ) {
+        System.out.println("dddd============"+sign);
         return helloService.hiService( name );
     }
 }
