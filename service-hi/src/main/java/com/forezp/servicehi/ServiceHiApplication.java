@@ -22,12 +22,15 @@ public class ServiceHiApplication {
     @Value("${server.port}")
     String port;
 
-   /* @RequestMapping("/hi")
-    public String home(@RequestParam(value = "name", defaultValue = "forezp") String name,@RequestBody String sign ) {
-        return "hi " + name + " ,i am from port:" + port +sign;
+/*   @RequestMapping("/hi")
+    public String home(@RequestParam(value = "name", defaultValue = "forezp") String name ) {
+       System.out.println("成功");
+        return "hi " + name + " ,i am from port:" + port;
     }*/
     @RequestMapping("/hi")
     public String home(@RequestBody String sign ) {
+         System.out.println("成功");
+        System.out.println("heheheheehehehe");
         return sign;
     }
 }

@@ -2,6 +2,7 @@ package com.forezp.serviceribbon.web;
 
 import com.forezp.serviceribbon.service.HelloService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -17,8 +18,8 @@ public class HelloControler {
     HelloService helloService;
 
     @RequestMapping (value = "/hi")
-    public String hi(@RequestParam String name,@RequestBody String sign ) {
-        System.out.println("dddd============"+sign);
+    public String hi(@RequestParam String name) {
+        System.out.println("dddd============");
         return helloService.hiService( name );
     }
 }
