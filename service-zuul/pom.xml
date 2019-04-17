@@ -13,7 +13,7 @@
 
     <parent>
         <groupId>com.forezp</groupId>
-        <artifactId>sc-f-chapter5</artifactId>
+        <artifactId>apigateway</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 

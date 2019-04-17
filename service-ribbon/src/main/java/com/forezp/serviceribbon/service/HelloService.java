@@ -28,10 +28,13 @@ public class HelloService {
     public String hiService(String name){
 
         System.out.println("name:"+name);
-        System.out.println("request:"+request);
+        //System.out.println("request:"+request.toString());
+        //System.out.println("request:"+request.getRequestURI());
+        //System.out.println("request:"+request.getParameterMap());
        return restTemplate.postForObject("http://SERVICE-HI/hi?name="+name,"ddd",String.class);
        //return restTemplate.postForObject("http://SERVICE-HI/hi?name="+name,request,String.class);
-       //return restTemplate.getForObject("http://SERVICE-HI/hi?name="+name,String.class);
+       //return restTemplate.getForObject("http://ACCOUNTMSSERVICE/api/AdminCompany/GetAllCompany",String.class);
+        //return restTemplate.postForObject("http://ACCOUNTMSSERVICE/api/AdminCompany/GetAllCompany?name="+name,"ddd",String.class);
     }
 
     public String hiError(String name) {
