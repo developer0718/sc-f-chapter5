@@ -26,9 +26,9 @@ import java.util.Map;
  * create 2018-07-09
  **/
 @Component
-public class MyFilter extends ZuulFilter {
+public class RequestFilter extends ZuulFilter {
 
-    private static Logger log = LoggerFactory.getLogger(MyFilter.class);
+    private static Logger log = LoggerFactory.getLogger(RequestFilter.class);
     @Override
     public String filterType() {
         return "pre";
@@ -52,14 +52,14 @@ public class MyFilter extends ZuulFilter {
       try {
           //获取请求体中的数据
           BufferedReader streamReader = new BufferedReader( new InputStreamReader(request.getInputStream(), "UTF-8"));
-          StringBuilder responseStrBuilder = new StringBuilder();
+          StringBuilder requestStrBuilder = new StringBuilder();
           String inputStr;
           while ((inputStr = streamReader.readLine()) != null){
-              responseStrBuilder.append(inputStr);
+              requestStrBuilder.append(inputStr);
           }
 
           //将请求体中的数据解密
-          JSONObject requestData = JSONObject.parseObject(responseStrBuilder.toString());
+          JSONObject requestData = JSONObject.parseObject(requestStrBuilder.toString());
           String body = requestData.get("body").toString();
           JSONObject jsonBody = JSONObject.parseObject(AESUtil.Decrypt(body,"hehehehehehehehe",1));
           //取出自带签名
@@ -90,8 +90,16 @@ public class MyFilter extends ZuulFilter {
               ctx.setSendZuulResponse(false);
               ctx.setResponseStatusCode(401);
               try {
+                  JSONObject responseData = new JSONObject();
+                  JSONObject responseBody = new JSONObject();
+                  responseBody.put("success","false");
+                  responseBody.put("code","100001");
+                  responseBody.put("msg","请求体签名不匹配");
+                  responseBody.put("data","{}");
+
+                  responseData.put("body",responseBody);
                   ctx.getResponse().setCharacterEncoding("utf-8");
-                  ctx.getResponse().getWriter().write(new String("签名不匹配".getBytes("utf-8")));
+                  ctx.getResponse().getWriter().write(new String(responseData.toJSONString().getBytes("utf-8")));
               }catch (Exception e){
                   e.printStackTrace();
               }
