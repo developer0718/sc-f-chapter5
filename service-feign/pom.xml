@@ -13,7 +13,7 @@
 
 
     <parent>
-        <groupId>com.forezp</groupId>
+        <groupId>com.netzoom</groupId>
         <artifactId>apigateway</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>

@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.netzoom.dao.UserDAO">
+
+    <!--通过用户名查询用户-->
+    <select id="queryUser" parameterType="com.netzoom.servicezuul.apimanager.model.User" resultType="com.netzoom.servicezuul.apimanager.model.User">
+        select
+        serviceName as username,
+        serviceId as userId,
+        sign as password,
+        state,createTime,createUser,updateTime,updateUser
+        from t_service where serviceId = #{userId} and state = 1
+    </select>
+    <!--通过用户id查询用户-->
+    <select id="queryUserByUserId" parameterType="com.netzoom.servicezuul.apimanager.model.User" resultType="com.netzoom.servicezuul.apimanager.model.User">
+        select
+        serviceName as username,
+        serviceId as userId,
+        sign as password,
+        state,createTime,createUser,updateTime,updateUser
+        from t_service where serviceId = #{userId} and state != 3
+    </select>
+    <!--禁用用户-->
+    <update id="disableUser" parameterType="com.netzoom.servicezuul.apimanager.model.User">
+        update t_service
+        set state = 2 where serviceId = #{userId}
+    </update>
+    <!--删除用户-->
+    <update id="deleteUser" parameterType="com.netzoom.servicezuul.apimanager.model.User">
+        update t_service
+        set state = 3 where serviceId = #{userId}
+    </update>
+    <!--启用用户-->
+    <update id="enableUser" parameterType="com.netzoom.servicezuul.apimanager.model.User">
+        update t_service
+        set state = 1 where serviceId = #{userId}
+    </update>
+    <!--查询用户（不查已删除的用户）-->
+    <select id="queryUserList" resultType="com.netzoom.servicezuul.apimanager.model.User">
+        select
+        serviceName as username,
+        serviceId as userId,
+        sign as password,
+        state,createTime,createUser,updateTime,updateUser from t_service where state != 3
+    </select>
+    <!--更新用户-->
+    <update id="updateService" parameterType="com.netzoom.servicezuul.apimanager.model.User">
+        update t_service
+        <set>
+            <if test="username != null">
+                serviceName = #{username,jdbcType=VARCHAR},
+            </if>
+            updateUser = #{updateUser}
+        </set>
+        where serviceId = #{userId}
+    </update>
+    <!--通过用户名查询角色-->
+    <select id="queryRoleByUsername" parameterType="com.netzoom.servicezuul.apimanager.model.User" resultType="com.netzoom.servicezuul.apimanager.model.Role">
+        select r.roleId , roleName from t_role r left join t_service_role sr on r.roleId = sr.roleId where serviceId = #{userId} and r.state = 1
+    </select>
+    <!--对应角色有什么样的权限-->
+    <select id="queryRolePermission" parameterType="com.netzoom.servicezuul.apimanager.model.Role" resultType="com.netzoom.servicezuul.apimanager.model.Permission">
+        select permissionId,resource,permissionName,state,createUser,createTime,updateTime,updateUser,parentId,serviceId
+         from t_permission p
+         left join t_role_permission rp
+         on rp.permissionId = p.permissionId
+         where roleId = #{roleId}
+    </select>
+
+    <!--查询所有角色所拥有权限-->
+    <select id="queryPermission" resultType="com.netzoom.servicezuul.apimanager.model.Permission">
+       select p.permissionId,resource,permissionName, rd.roleName,rd.roleId
+       from t_permission p
+       right join (select r.roleId,roleName,permissionId from t_role_permission rp left join t_role r on rp.roleId = r.roleId where r.state = 1 ) rd
+       on rd.permissionId = p.permissionId;
+    </select>
+    <!--插入权限-->
+    <insert id="insertPermission" parameterType="com.netzoom.servicezuul.apimanager.model.Permission">
+        insert into t_permission
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="permissionId != null">
+                permissionId,
+            </if>
+                serviceId,
+            <if test="permissionType != null">
+                permissionType,
+            </if>
+            <if test="permissionName != null">
+                permissionName,
+            </if>
+            <if test="parentId != null">
+                parentId,
+            </if>
+            <if test="state != null">
+                state,
+            </if>
+            <if test="createUser != null">
+                createUser,
+            </if>
+            <if test="resource != null">
+                resource,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="permissionId != null">
+                #{permissionId,jdbcType=VARCHAR},
+            </if>
+             #{serviceId},
+            <if test="permissionType != null">
+                #{permissionType,jdbcType=VARCHAR},
+            </if>
+            <if test="permissionName != null">
+                #{permissionName,jdbcType=VARCHAR},
+            </if>
+            <if test="parentId != null">
+                #{parentId,jdbcType=VARCHAR},
+            </if>
+            <if test="state != null">
+                #{state,jdbcType=INTEGER},
+            </if>
+            <if test="createUser != null">
+                #{createUser,jdbcType=VARCHAR},
+            </if>
+            <if test="resource != null">
+                #{resource,jdbcType=LONGVARCHAR},
+            </if>
+        </trim>
+    </insert>
+    <!--为角色授权-->
+    <insert id="insertRolePermission" parameterType="com.netzoom.servicezuul.apimanager.model.Role">
+        insert into t_role_permission(roleId, permissionId) VALUES (#{roleId},#{permissionId})
+    </insert>
+
+    <!--为用户授角色-->
+    <insert id="insertUserRole" parameterType="com.netzoom.servicezuul.apimanager.model.User">
+        insert into t_service_role(serviceId, roleId) VALUES (#{userId},#{roleId})
+    </insert>
+    <!--查询所有权限-->
+    <select id="queryAllPermission" resultType="com.netzoom.servicezuul.apimanager.model.Permission">
+        select * from t_permission;
+    </select>
+    <!--新增服务用户-->
+    <insert id="insertUser" parameterType="com.netzoom.servicezuul.apimanager.model.User">
+        insert into t_service(serviceId, serviceName, sign, state, createUser)
+        values (#{userId},#{username},#{password},#{state},#{createUser})
+    </insert>
+    <!--新增角色-->
+    <insert id="insertRole" parameterType="com.netzoom.servicezuul.apimanager.model.Role">
+        insert into t_role(roleId, roleName, state, roleDetail, createUser)
+        values (#{roleId},#{roleName},#{state},#{roleDetail},#{createUser})
+    </insert>
+    <!--删除角色-->
+    <update id="deleteRole" parameterType="com.netzoom.servicezuul.apimanager.model.Role">
+        update t_role set state = 3 , updateUser = #{updateUser} where roleId = #{roleId}
+    </update>
+    <!--编辑角色-->
+    <update id="editRole" parameterType="com.netzoom.servicezuul.apimanager.model.Role">
+        update t_role set roleName = #{roleName},roleDetail = #{roleDetail},updateUser = #{updateUser} where roleId = #{roleId}
+    </update>
+    <!--禁用角色-->
+    <update id="disableRole" parameterType="com.netzoom.servicezuul.apimanager.model.Role">
+        update t_role set state = 2 , updateUser = #{updateUser} where roleId = #{roleId}
+    </update>
+    <!--启用角色-->
+    <update id="enableRole" parameterType="com.netzoom.servicezuul.apimanager.model.Role">
+        update t_role set state = 1 , updateUser = #{updateUser} where roleId = #{roleId}
+    </update>
+    <!--查询权限信息-->
+    <select id="queryPermissionDetail" parameterType="com.netzoom.servicezuul.apimanager.model.Permission" resultType="com.netzoom.servicezuul.apimanager.model.Permission">
+        select * from t_permission where permissionId = #{permissionId}
+    </select>
+    <!--查询权限角色-->
+    <select id="queryPermissionRole" parameterType="com.netzoom.servicezuul.apimanager.model.Permission" resultType="com.netzoom.servicezuul.apimanager.model.Role">
+        select * from t_role where roleId = (select roleId from t_role_permission where permissionId = #{permissionId} and state != 3)
+    </select>
+    <!--通过serviceId查询其所挂载的接口-->
+    <select id="queryPermissionByUserId" parameterType="com.netzoom.servicezuul.apimanager.model.User" resultType="com.netzoom.servicezuul.apimanager.model.Permission">
+        select * from t_permission where serviceId = #{userId}
+    </select>
+    <!--查询非删除状态的角色列表-->
+    <select id="queryRoleList" resultType="com.netzoom.servicezuul.apimanager.model.Role">
+        select * from t_role where state != 3;
+    </select>
+    <!--通过角色id删除关联权限-->
+    <delete id="deleteRolePermission" parameterType="com.netzoom.servicezuul.apimanager.model.Role">
+        delete from t_role_permission where roleId = #{roleId}
+    </delete>
+    <!--禁用服务资源-->
+    <update id="disablePermission" parameterType="com.netzoom.servicezuul.apimanager.model.Permission">
+        update t_permission set state = 2 where permissionId = #{permissionId}
+    </update>
+    <!--启用服务资源-->
+    <update id="enablePermission" parameterType="com.netzoom.servicezuul.apimanager.model.Permission">
+        update t_permission set state = 1 where permissionId = #{permissionId}
+    </update>
+    <!--删除服务资源-->
+    <delete id="deletePermission" parameterType="com.netzoom.servicezuul.apimanager.model.Permission">
+        delete from t_permission where permissionId = #{permissionId}
+    </delete>
+    <!--更新资源-->
+    <update id="updatePermission" parameterType="com.netzoom.servicezuul.apimanager.model.Permission">
+        update t_permission
+        <set>
+            <if test="serviceId != null">
+                serviceId = #{serviceId},
+            </if>
+            <if test="permissionName != null">
+                permissionName = #{permissionName},
+            </if>
+            <if test="resource != null">
+                resource = #{resource},
+            </if>
+            updateUser = #{updateUser}
+        </set>
+        where permissionId = #{permissionId}
+    </update>
+    <!--模糊查询角色列表-->
+    <select id="selectRoleListFuzzy" parameterType="com.netzoom.servicezuul.apimanager.model.Role" resultType="com.netzoom.servicezuul.apimanager.model.Role">
+        select * from t_role where state = 1 and roleName like "%"#{roleName}"%"
+    </select>
+    <!--取消服务角色授权-->
+    <delete id="unAuthenticatedServiceRole" parameterType="com.netzoom.servicezuul.apimanager.model.User">
+        delete from t_service_role where serviceId = #{userId}
+    </delete>
+    <delete id="unAuthenticatedPermission" parameterType="com.netzoom.servicezuul.apimanager.model.Permission">
+        delete from t_role_permission where permissionId = #{permissionId}
+    </delete>
+</mapper>

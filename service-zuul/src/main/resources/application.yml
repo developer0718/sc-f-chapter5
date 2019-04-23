@@ -4,17 +4,32 @@ eureka:
       defaultZone: http://localhost:9761/eureka/
 server:
   port: 9769
+  session-timeout: 30
+  tomcat.uri-encoding: utf-8
 spring:
   application:
     name: service-zuul
+  datasource:
+    #    url: jdbc:mysql://202.135.136.180:3306/securityDB?useUnicode=true&characterEncoding=utf-8&useSSL=false
+    url: jdbc:mysql://202.135.136.180:3306/apiManager?useUnicode=true&characterEncoding=utf-8&useSSL=false
+    username: root
+    password: jn2018.
+    driver-class-name: com.mysql.jdbc.Driver
 zuul:
   routes:
     api-a:
-      path: /api-a/**
+      path: /api/a/**
       serviceId: service-ribbon
     api-b:
-      path: /api-b/**
+      path: /api/b/**
       serviceId: service-feign
     api-c:
-      path: /api-c/**
+      path: /api/c/**
       serviceId: ACCOUNTMSSERVICE
+
+mybatis:
+  mapper-locations: classpath:sqlclient/*.xml
+
+logging:
+  level:
+    root: debug
