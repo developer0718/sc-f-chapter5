@@ -19,7 +19,7 @@ public class AESUtil {
             if (sKey == null) {
                 System.out.println("Key为空null");
                 return null;
-            } else if (sKey.length() != 16) {
+            } else if (sKey.length() != 32) {
                 System.out.println("Key长度不是16位");
                 return null;
             } else {
@@ -48,7 +48,7 @@ public class AESUtil {
             if (sKey == null) {
                 System.out.println("Key为空null");
                 return null;
-            } else if (sKey.length() != 16) {
+            } else if (sKey.length() != 32) {
                 System.out.println("Key长度不是16位");
                 return null;
             } else {

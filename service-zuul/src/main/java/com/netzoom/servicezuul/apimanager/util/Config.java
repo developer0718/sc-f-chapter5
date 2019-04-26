@@ -60,7 +60,7 @@ public class Config extends WebSecurityConfigurerAdapter {
 		http.csrf().disable();
 		//配置认证规则
 		http.authorizeRequests()
-				.antMatchers("/","index","/login","/login-error","/401","/css/**","/js/**","/user/login","/login/test","/api/**","/adminLogin","/error","/api/**").permitAll()
+				.antMatchers("/","index","/login","/login-error","/401","/css/**","/js/**","/user/login","/login/test","/api-c/**","/adminLogin","/error","/api/**").permitAll()
 				.anyRequest().authenticated()
 				.and()
 				//loginPage/loginProcessingURL指登录的接口与默认登录界面

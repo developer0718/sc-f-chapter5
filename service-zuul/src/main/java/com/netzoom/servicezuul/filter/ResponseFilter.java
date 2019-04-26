@@ -1,22 +1,26 @@
 package com.netzoom.servicezuul.filter;
 
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.parser.Feature;
 import com.netzoom.servicezuul.utils.AESUtil;
 import com.netzoom.servicezuul.utils.EncryptUtil;
 import com.netflix.zuul.ZuulFilter;
 import com.netflix.zuul.context.RequestContext;
 import com.netflix.zuul.exception.ZuulException;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
 
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.nio.charset.Charset;
-import java.util.Map;
+import java.util.TreeMap;
 
 import static com.netflix.zuul.context.RequestContext.getCurrentContext;
 import static org.springframework.cloud.netflix.zuul.filters.support.FilterConstants.POST_TYPE;
@@ -37,7 +41,15 @@ public class ResponseFilter extends ZuulFilter {
 
     @Override
     public boolean shouldFilter() {
-        return true;
+        RequestContext context = getCurrentContext();
+        HttpServletResponse response = context.getResponse();
+        log.info("响应状态码response.Status："+response.getStatus());
+        log.info("响应状态码response.getResponseStatusCode："+context.getResponseStatusCode());
+        if(response.getStatus()==200){
+            return true;
+        }else{
+            return false;
+        }
     }
 
     @Override
@@ -49,25 +61,33 @@ public class ResponseFilter extends ZuulFilter {
             String data= StreamUtils.copyToString(stream, Charset.forName("UTF-8"));
             log.info("responseBody:"+data);
             //context.setResponseBody("new responseBody: "+data);
-            //将请求体中的数据解密
-            String hehe= AESUtil.Decrypt(data,"hehehehehehehehe",1);
-            System.out.println("hehe:"+hehe);
-            JSONObject reponseData = JSONObject.parseObject(hehe);
-            JSONObject body = reponseData.getJSONObject("body");
 
+            System.out.println("data:"+data);
+            JSONObject reponseData = JSON.parseObject(data, Feature.OrderedField);
+            //System.out.println(JSON.toJSONString(jsonObject));
+            //JSONObject reponseData = JSONObject.parseObject(data);
+            String secretBody = reponseData.getString("body");
+            String header = reponseData.getString("header");
+            JSONObject header1 = reponseData.getJSONObject("header");
+            //将请求体中的数据解密
+            String stringBody= AESUtil.Decrypt(secretBody,"96621bac8f5948fa97792138f635b49c",1);
+            JSONObject body= JSONObject.parseObject(stringBody);
             //取出自带签名
-            String sign = reponseData.get("sign").toString();
+            String sign = reponseData.getString("sign");
             log.info("请求自带签名sign："+sign);
             //将请求体中数据转换成map，并将参数拼接成目标格式字符串，以备生成签名
-            Map mapBody = body;
+            log.info("bodytoJSONString"+body.toJSONString());
+            TreeMap<String,String> hashMap = new TreeMap();
+            hashMap.put("header",header);
+            hashMap.put("body",stringBody);
             StringBuilder sb = new StringBuilder();
             String temp ="";
             //根据请求体数据，生成签名
-            String secretkey="192006250b4c09247ec02edce69f6a2d";
-            for(Object key : mapBody.keySet()){
-                temp = mapBody.get(key).toString();
+            String secretkey="c70815ad156d4ddb9839bc8af1b7b6f6";
+            for(Object key : hashMap.keySet()){
+                temp = hashMap.get(key).toString();
                 if(!StringUtils.isBlank(temp)){
-                    sb.append(key+"="+mapBody.get(key)+"&");
+                    sb.append(key+"="+hashMap.get(key)+"&");
                 }
             }
             //将目标字符串拼接秘钥
@@ -78,7 +98,7 @@ public class ResponseFilter extends ZuulFilter {
             log.info("MD5加密后生成签名结果："+tempSign);
             log.info("请求体自带的签名tempSign:"+sign);
             //如果签名不匹配，结束过滤，并返回响应
-            if(!tempSign.equals(sign)) {
+            if(!tempSign.toUpperCase().equals(sign)) {
                 log.warn("签名不匹配");
                 context.setSendZuulResponse(false);
                 context.setResponseStatusCode(401);
@@ -102,42 +122,11 @@ public class ResponseFilter extends ZuulFilter {
             System.out.println("body.toJSONString()"+body.toJSONString());
             context.setResponseBody(body.toJSONString());
 
-         /*   //Object zuulResponse = RequestContext.getCurrentContext().get("zuulResponse");
-            InputStream stream = RequestContext.getCurrentContext().getResponseDataStream();
-            if (stream != null) {
-                //RibbonHttpResponse resp = (RibbonHttpResponse) zuulResponse;
-                BufferedReader streamReader = new BufferedReader( new InputStreamReader(stream, "UTF-8"));
-                StringBuilder requestStrBuilder = new StringBuilder();
-                String inputStr;
-                while ((inputStr = streamReader.readLine()) != null){
-                    requestStrBuilder.append(inputStr);
-                }
-                System.out.println("response:"+inputStr);
-                //resp.close();*/
-                //RequestContext.getCurrentContext().setResponseBody(inputStr);
             } catch (Exception e) {
-            e.printStackTrace();
-        }
+                 e.printStackTrace();
+             }
 
-/*        RequestContext ctx = RequestContext.getCurrentContext();
-        HttpServletResponse response =ctx.getResponse();
-        HttpResponse response111;
 
-        ServletResponseWrapper responseWrapper=new ServletResponseWrapper(response);
-
-        System.out.println("response:"+responseWrapper.getResponseBody());*/
-  /*      try {
-            //获取响应体中的数据
-            BufferedWriter streamWriter = new BufferedWriter( new OutputStreamWriter(response.getOutputStream(), "UTF-8"));
-            StringBuilder requestStrBuilder = new StringBuilder();
-            String inputStr;
-            while ((inputStr = streamWriter.readLine()) != null){
-                requestStrBuilder.append(inputStr);
-            }
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-*/
 
 
         return null;

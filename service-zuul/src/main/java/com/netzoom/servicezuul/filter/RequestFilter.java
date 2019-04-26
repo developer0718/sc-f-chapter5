@@ -70,9 +70,20 @@ public class RequestFilter extends ZuulFilter {
             //执行执行http请求
             response = httpClient.execute(httpPost);
             //得到Response结果
-            String resultString = EntityUtils.toString(response.getEntity(), "utf-8");
+            if(response.getStatusLine().getStatusCode() == 200){
+                String resultString = EntityUtils.toString(response.getEntity(), "utf-8");
+                log.info("返回结果：" + resultString);
+                JSONObject loginResult = JSONObject.parseObject(resultString);
+                String result = loginResult.getString("result");
+                if("success".equals(result)){
+                    return true;
+                }else{
+                    return  false;
+                }
+            }else{
+                return false;
+            }
 
-            log.info("返回结果：" + resultString);
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -99,16 +110,17 @@ public class RequestFilter extends ZuulFilter {
           //将请求体中的数据解密
           JSONObject requestData = JSONObject.parseObject(requestStrBuilder.toString());
           String body = requestData.get("body").toString();
-          JSONObject jsonBody = JSONObject.parseObject(AESUtil.Decrypt(body,"hehehehehehehehe",1));
+          JSONObject jsonBody = JSONObject.parseObject(AESUtil.Decrypt(body,"96621bac8f5948fa97792138f635b49c",1));
           //取出自带签名
           String sign = requestData.get("sign").toString();
           log.info("请求自带签名sign："+sign);
           //将请求体中数据转换成map，并将参数拼接成目标格式字符串，以备生成签名
+          log.info("解密后的请求body:"+jsonBody);
           Map mapBody = jsonBody;
           StringBuilder sb = new StringBuilder();
           String temp ="";
           //根据请求体数据，生成签名
-          String secretkey="192006250b4c09247ec02edce69f6a2d";
+          String secretkey="c70815ad156d4ddb9839bc8af1b7b6f6";
           for(Object key : mapBody.keySet()){
               temp = mapBody.get(key).toString();
               if(!StringUtils.isBlank(temp)){

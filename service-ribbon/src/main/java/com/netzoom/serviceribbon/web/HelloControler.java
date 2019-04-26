@@ -6,12 +6,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 
-/**
- * Email miles02@163.com
- *
- * @author fangzhipeng
- * create 2018-07-09
- **/
 @RestController
 public class HelloControler {
 
