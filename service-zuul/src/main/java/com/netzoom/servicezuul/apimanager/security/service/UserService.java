@@ -208,7 +208,7 @@ public class UserService {
 			if (result == 1) {
 				return new SuccessModel("修改角色成功");
 			} else {
-				//todo 加事务
+
 				logger.error("修改角色失败，影响" + result + "条记录");
 				return new FailModel("修改角色失败");
 			}

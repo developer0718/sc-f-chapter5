@@ -14,6 +14,6 @@ public class SignEncoder implements PasswordEncoder {
 
 	@Override
 	public boolean matches(CharSequence charSequence, String s) {
-		return true;
+		return charSequence.toString().equals(s);
 	}
 }

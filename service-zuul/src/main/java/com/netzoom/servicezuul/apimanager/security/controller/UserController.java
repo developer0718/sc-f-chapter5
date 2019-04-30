@@ -134,7 +134,6 @@ public class UserController extends BaseController {
 	 */
 	@PostMapping(value = "/deleteRole")
 	public BaseModel deleteRole(HttpServletRequest request, @RequestBody Role role) throws Exception {
-//		String updateUser = super.getCurrentUID(request);
 		String updateUser = "admin";
 		role.setUpdateUser(updateUser);
 		return userService.deleteRole(role);

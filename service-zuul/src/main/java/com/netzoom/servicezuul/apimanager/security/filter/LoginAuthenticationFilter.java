@@ -33,7 +33,7 @@ public class LoginAuthenticationFilter extends UsernamePasswordAuthenticationFil
 	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
 		UsernamePasswordAuthenticationToken authRequest = null;
 		BufferedReader streamReader = null;
-		if (request.getContentType().equals(MediaType.APPLICATION_JSON_UTF8_VALUE)|| request.getContentType().equals(MediaType.APPLICATION_JSON_VALUE)|| "application/json; charset=UTF-8".equals(request.getContentType())) {
+		if (request.getContentType().equals(MediaType.APPLICATION_JSON_UTF8_VALUE)|| request.getContentType().equals(MediaType.APPLICATION_JSON_VALUE)) {
 			try {
 				//解析request中的JSON并转换为User类对象
 				streamReader = new BufferedReader(new InputStreamReader(request.getInputStream(), "UTF-8"));
@@ -44,9 +44,9 @@ public class LoginAuthenticationFilter extends UsernamePasswordAuthenticationFil
 				}
 				User user = JSONObject.toJavaObject(JSON.parseObject(stringBuilder.toString()), User.class);
 				//认证请求
-				logger.debug("user为："+ JSON.toJSONString(user)+"password为："+user.getPassword()+"userId为："+user.getUserId());
+				logger.debug("user为："+JSON.toJSONString(user)+"password为："+user.getPassword()+"userId为："+user.getUserId());
 				authRequest = new UsernamePasswordAuthenticationToken(user.getUserId(), user.getPassword());
-				logger.debug("authRequest:"+ JSON.toJSONString(authRequest));
+				logger.debug("authRequest:"+JSON.toJSONString(authRequest));
 				setDetails(request, authRequest);
 			} catch (IOException e) {
 				e.printStackTrace();

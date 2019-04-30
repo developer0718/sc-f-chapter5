@@ -7,11 +7,13 @@ import com.netzoom.servicezuul.apimanager.security.dao.UserDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -39,7 +41,7 @@ public class MyUserDetailService implements UserDetailsService {
 	@Override
 	public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
 		logger.debug("user用户名：{}", userId);
-//		List<GrantedAuthority> grantedAuthorityList = new ArrayList<>();
+		List<GrantedAuthority> grantedAuthorityList = new ArrayList<>();
 		// 封装用户信息，并返回。参数分别是：用户名，密码，用户权限
 		User queryUser = new User();
 		queryUser.setUserId(Integer.parseInt(userId));

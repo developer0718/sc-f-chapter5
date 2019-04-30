@@ -17,7 +17,6 @@ import java.util.List;
 
 
 @RestController
-@RequestMapping(value = "/api")
 public class TestController extends BaseController{
 
     @Autowired
@@ -53,7 +52,7 @@ public class TestController extends BaseController{
 //    	return userService.insertRolePermission(permission);
 //	}
 
-	@PostMapping(value = "/api/testMethod")
+	@PostMapping(value = "testMethod2")
 	public String testMethod(){
     	return "execute /api/testMethod success";
 	}

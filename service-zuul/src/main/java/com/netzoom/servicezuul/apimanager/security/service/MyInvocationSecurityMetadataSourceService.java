@@ -56,7 +56,7 @@ public class MyInvocationSecurityMetadataSourceService implements FilterInvocati
 				return map.get(url);
 			}
 		}
-		logger.debug("map为："+ JSON.toJSONString(map));
+		logger.debug("map为："+JSON.toJSONString(map));
 		//没有匹配上的资源，都是登录访问
 		return SecurityConfig.createList("ROLE_LOGIN");
 	}

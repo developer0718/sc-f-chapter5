@@ -23,7 +23,6 @@ public class UserDAO {
 	 * @throws Exception
 	 */
 	public User queryUser(User user) throws Exception {
-		System.out.println("user的具体为："+user.getUserId()+"password:"+user.getPassword());
 		return baseDAO.queryForObject(NS + "queryUser", user);
 	}
 

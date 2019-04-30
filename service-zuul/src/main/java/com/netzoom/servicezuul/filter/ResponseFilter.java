@@ -48,6 +48,22 @@ public class ResponseFilter extends ZuulFilter {
         if(response.getStatus()==200){
             return true;
         }else{
+            log.warn("请求");
+
+            JSONObject responseData = new JSONObject();
+            JSONObject responseBody = new JSONObject();
+            JSONObject data = new JSONObject();
+            data.put("ServiceHttpCode",context.getResponseStatusCode());
+            responseBody.put("success","false");
+            responseBody.put("code","199999");
+            responseBody.put("msg","服务器异常或请求404");
+            responseBody.put("data",data);
+            responseData.put("body",responseBody);
+            context.getResponse().setCharacterEncoding("UTF-8");
+            context.setResponseBody(responseData.toJSONString());
+            context.setSendZuulResponse(false);
+            context.setResponseStatusCode(200);
+
             return false;
         }
     }
@@ -95,27 +111,22 @@ public class ResponseFilter extends ZuulFilter {
             log.info("MD5加密前生成签名目标字符串："+sb);
             //将目标字符串生成签名
             String tempSign = EncryptUtil.md5Encode(sb.toString());
-            log.info("MD5加密后生成签名结果："+tempSign);
+            log.info("MD5加密后生成签名结果转大写："+tempSign.toUpperCase());
             log.info("请求体自带的签名tempSign:"+sign);
             //如果签名不匹配，结束过滤，并返回响应
             if(!tempSign.toUpperCase().equals(sign)) {
                 log.warn("签名不匹配");
                 context.setSendZuulResponse(false);
-                context.setResponseStatusCode(401);
-                try {
-                    JSONObject responseData = new JSONObject();
-                    JSONObject responseBody = new JSONObject();
-                    responseBody.put("success","false");
-                    responseBody.put("code","100001");
-                    responseBody.put("msg","响应体签名不匹配");
-                    responseBody.put("data","{}");
-                    responseData.put("body",responseBody);
-                    context.setResponseBody(responseData.toJSONString());
-              /*   context.getResponse().setCharacterEncoding("utf-8");
-                 context.getResponse().getWriter().write(new String(responseData.toJSONString().getBytes("utf-8")));*/
-                }catch (Exception e){
-                    e.printStackTrace();
-                }
+                //context.setResponseStatusCode(401);
+                JSONObject responseData = new JSONObject();
+                JSONObject responseBody = new JSONObject();
+                responseBody.put("success","false");
+                responseBody.put("code","100001");
+                responseBody.put("msg","响应体签名不匹配");
+                responseBody.put("data","{}");
+                responseData.put("body",responseBody);
+                context.setResponseBody(responseData.toJSONString());
+                context.getResponse().setCharacterEncoding("UTF-8");
                 return null;
             }
 
@@ -123,10 +134,22 @@ public class ResponseFilter extends ZuulFilter {
             context.setResponseBody(body.toJSONString());
 
             } catch (Exception e) {
-                 e.printStackTrace();
+                e.printStackTrace();
+                RequestContext context = getCurrentContext();
+                log.warn("签名不匹配");
+                context.setSendZuulResponse(false);
+                //context.setResponseStatusCode(401);
+
+                JSONObject responseData = new JSONObject();
+                JSONObject responseBody = new JSONObject();
+                responseBody.put("success","false");
+                responseBody.put("code","100001");
+                responseBody.put("msg","服务器异常");
+                responseBody.put("data","{}");
+                responseData.put("body",responseBody);
+                context.setResponseBody(responseData.toJSONString());
+                context.getResponse().setCharacterEncoding("UTF-8");
              }
-
-
 
 
         return null;

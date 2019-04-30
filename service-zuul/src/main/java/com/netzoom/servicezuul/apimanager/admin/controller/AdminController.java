@@ -27,7 +27,7 @@ public class AdminController {
 
 	@ResponseBody
 	@RequestMapping(value = "/adminLogin", method = RequestMethod.POST)
-	public BaseModel login(HttpServletRequest request, @RequestBody Admin admin) {
+	public BaseModel login(HttpServletRequest request,@RequestBody Admin admin) {
 
 		BaseModel loginResult = null;
 		try {
