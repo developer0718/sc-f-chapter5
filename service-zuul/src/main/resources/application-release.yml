@@ -1,0 +1,51 @@
+server:
+  port: 9769
+  session-timeout: 30
+  tomcat.uri-encoding: utf-8
+spring:
+  application:
+    name: service-zuul
+  cloud:
+    consul:
+      host: 192.168.20.25
+      port: 8500
+      discovery:
+        serviceName: service-zuul
+        register: true
+        tags: version=1.0,author=liuzw
+        healthCheckPath: /actuator/health
+        healthCheckInterval: 10s
+        prefer-ip-address: true
+  datasource:
+    url: jdbc:mysql://192.168.20.33:3306/apiManager?useUnicode=true&characterEncoding=utf-8&useSSL=false
+    username: root
+    password: MySQL@876
+    driver-class-name: com.mysql.jdbc.Driver
+zuul:
+  ignoredServices: '*'
+  routes:
+    account:
+      path: /account/**
+      serviceId: ISP_ACCOUNTSERVICE
+    action:
+      path: /action/**
+      serviceId: ISP_ACTIONSERVICE
+    cent:
+      path: /cent/**
+      serviceId: ISP_CENTSERVICE
+    cas:
+      path: /cas/**
+      serviceId: unifiedAuthentication
+    authentication:
+      path: /authentication/**
+      serviceId: authenticationMS
+
+
+mybatis:
+  mapper-locations: classpath:sqlclient/*.xml
+
+logging:
+  level:
+    root: info
+  path: /main/apps/
+  file: zuul.log

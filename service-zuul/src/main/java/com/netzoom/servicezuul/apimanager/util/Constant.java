@@ -30,5 +30,10 @@ public class Constant {
 	 */
 	public static String USER_ID = "userId";
 
+	/**
+	 * 加密盐
+	 */
 	public static String SALT = "ISP";
+
+	public static String MVC_REQUEST_PATTERN = "/api/*";
 }

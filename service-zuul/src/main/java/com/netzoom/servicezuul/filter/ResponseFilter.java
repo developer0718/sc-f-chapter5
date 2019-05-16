@@ -49,6 +49,16 @@ public class ResponseFilter extends ZuulFilter {
             return true;
         }else{
             log.warn("请求");
+            log.warn("msg:"+context.get("msg")+"");
+            log.warn("msg:"+context.get("msg")+"");
+            String msg;
+            try {
+                msg = context.get("msg").toString();
+            }catch (Exception e){
+                log.info("服务器异常或请求404");
+                msg = "服务器异常或请求404";
+            }
+
 
             JSONObject responseData = new JSONObject();
             JSONObject responseBody = new JSONObject();
@@ -56,7 +66,7 @@ public class ResponseFilter extends ZuulFilter {
             data.put("ServiceHttpCode",context.getResponseStatusCode());
             responseBody.put("success","false");
             responseBody.put("code","199999");
-            responseBody.put("msg","服务器异常或请求404");
+            responseBody.put("msg",msg);
             responseBody.put("data",data);
             responseData.put("body",responseBody);
             context.getResponse().setCharacterEncoding("UTF-8");
@@ -64,8 +74,8 @@ public class ResponseFilter extends ZuulFilter {
             context.setSendZuulResponse(false);
             context.setResponseStatusCode(200);
 
-            return false;
         }
+        return false;
     }
 
     @Override
@@ -84,7 +94,6 @@ public class ResponseFilter extends ZuulFilter {
             //JSONObject reponseData = JSONObject.parseObject(data);
             String secretBody = reponseData.getString("body");
             String header = reponseData.getString("header");
-            JSONObject header1 = reponseData.getJSONObject("header");
             //将请求体中的数据解密
             String stringBody= AESUtil.Decrypt(secretBody,"96621bac8f5948fa97792138f635b49c",1);
             JSONObject body= JSONObject.parseObject(stringBody);
@@ -121,7 +130,7 @@ public class ResponseFilter extends ZuulFilter {
                 JSONObject responseData = new JSONObject();
                 JSONObject responseBody = new JSONObject();
                 responseBody.put("success","false");
-                responseBody.put("code","100001");
+                responseBody.put("code","199999");
                 responseBody.put("msg","响应体签名不匹配");
                 responseBody.put("data","{}");
                 responseData.put("body",responseBody);
@@ -136,15 +145,15 @@ public class ResponseFilter extends ZuulFilter {
             } catch (Exception e) {
                 e.printStackTrace();
                 RequestContext context = getCurrentContext();
-                log.warn("签名不匹配");
+                log.warn("解析响应体异常");
                 context.setSendZuulResponse(false);
                 //context.setResponseStatusCode(401);
 
                 JSONObject responseData = new JSONObject();
                 JSONObject responseBody = new JSONObject();
                 responseBody.put("success","false");
-                responseBody.put("code","100001");
-                responseBody.put("msg","服务器异常");
+                responseBody.put("code","199999");
+                responseBody.put("msg","解析响应体异常");
                 responseBody.put("data","{}");
                 responseData.put("body",responseBody);
                 context.setResponseBody(responseData.toJSONString());

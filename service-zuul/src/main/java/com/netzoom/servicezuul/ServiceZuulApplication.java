@@ -20,16 +20,9 @@ public class ServiceZuulApplication extends SpringBootServletInitializer {
 
 
 
-    public static void main(String[] args) {
+   public static void main(String[] args) {
         SpringApplication.run( ServiceZuulApplication.class, args );
     }
-
-
-
-/*
-    @Override
-    protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) { return builder.sources(ServiceZuulApplication.class); }
-*/
 
     @Bean
     public HttpMessageConverters fastJsonHttpMessageConverters() {

@@ -60,7 +60,7 @@
     </select>
     <!--对应角色有什么样的权限-->
     <select id="queryRolePermission" parameterType="com.netzoom.servicezuul.apimanager.model.Role" resultType="com.netzoom.servicezuul.apimanager.model.Permission">
-        select permissionId,resource,permissionName,state,createUser,createTime,updateTime,updateUser,parentId,serviceId
+        select p.permissionId,resource,permissionName,state,createUser,createTime,updateTime,updateUser,parentId,serviceId
          from t_permission p
          left join t_role_permission rp
          on rp.permissionId = p.permissionId
@@ -171,7 +171,7 @@
     </select>
     <!--查询权限角色-->
     <select id="queryPermissionRole" parameterType="com.netzoom.servicezuul.apimanager.model.Permission" resultType="com.netzoom.servicezuul.apimanager.model.Role">
-        select * from t_role where roleId = (select roleId from t_role_permission where permissionId = #{permissionId} and state != 3)
+        select * from t_role left join t_role_permission on t_role.roleId = t_role_permission.roleId where permissionId = #{permissionId} and state !=3
     </select>
     <!--通过serviceId查询其所挂载的接口-->
     <select id="queryPermissionByUserId" parameterType="com.netzoom.servicezuul.apimanager.model.User" resultType="com.netzoom.servicezuul.apimanager.model.Permission">
@@ -224,5 +224,8 @@
     </delete>
     <delete id="unAuthenticatedPermission" parameterType="com.netzoom.servicezuul.apimanager.model.Permission">
         delete from t_role_permission where permissionId = #{permissionId}
+    </delete>
+    <delete id="deletePermissionRole" parameterType="com.netzoom.servicezuul.apimanager.model.Permission">
+        delete from t_role_permission where permissionId = #{permissionId};
     </delete>
 </mapper>

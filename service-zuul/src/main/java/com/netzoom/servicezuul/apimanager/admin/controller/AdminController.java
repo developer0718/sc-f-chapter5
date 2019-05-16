@@ -1,5 +1,6 @@
 package com.netzoom.servicezuul.apimanager.admin.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.netzoom.servicezuul.apimanager.admin.service.AdminService;
 import com.netzoom.servicezuul.apimanager.model.Admin;
 import com.netzoom.servicezuul.apimanager.model.BaseModel;
@@ -28,7 +29,7 @@ public class AdminController {
 	@ResponseBody
 	@RequestMapping(value = "/adminLogin", method = RequestMethod.POST)
 	public BaseModel login(HttpServletRequest request,@RequestBody Admin admin) {
-
+		System.out.println("!!!!!"+JSON.toJSONString(admin));
 		BaseModel loginResult = null;
 		try {
 			loginResult = adminService.doLogin(admin);

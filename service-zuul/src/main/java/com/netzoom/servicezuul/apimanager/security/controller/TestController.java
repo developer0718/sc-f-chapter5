@@ -17,6 +17,7 @@ import java.util.List;
 
 
 @RestController
+@RequestMapping(value = "/myApi")
 public class TestController extends BaseController{
 
     @Autowired

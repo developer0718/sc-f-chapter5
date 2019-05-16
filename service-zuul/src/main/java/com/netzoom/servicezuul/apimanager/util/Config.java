@@ -1,14 +1,19 @@
 package com.netzoom.servicezuul.apimanager.util;
 
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.netzoom.servicezuul.apimanager.model.BaseModel;
+import com.netzoom.servicezuul.apimanager.model.FailModel;
+import com.netzoom.servicezuul.apimanager.model.SuccessModel;
 import com.netzoom.servicezuul.apimanager.security.filter.LoginAuthenticationFilter;
 import com.netzoom.servicezuul.apimanager.security.service.MyUserDetailService;
 import com.netzoom.servicezuul.apimanager.security.util.SignEncoder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
@@ -25,6 +30,10 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -33,9 +42,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 /**
- * EnableWebSecurity 注解以及WebSecurityConfigurerAdapter
- * 一起配合提供基于web的security。自定义类
- * 继承了WebSecurityConfigurerAdapter来重写了一些方法来指定一些特定的Web安全设置。
+ * spring security 核心配置文件
+ *
+ * @author tanzj
  */
 @EnableWebSecurity
 @Configuration
@@ -58,7 +67,9 @@ public class Config extends WebSecurityConfigurerAdapter {
 	 */
 	@Override
 	public void configure(WebSecurity web) throws Exception {
-		web.ignoring().antMatchers("/index.html", "/static/**");
+//		web.ignoring().antMatchers("/index.html", "/static/**");
+//		web.ignoring().mvcMatchers("/adminLogin","/api/**");
+		web.ignoring().requestMatchers(new AntPathRequestMatcher("/adminLogin"),new AntPathRequestMatcher("/api/**"));
 	}
 
 
@@ -70,17 +81,13 @@ public class Config extends WebSecurityConfigurerAdapter {
 		http.csrf().disable();
 		//配置认证规则
 		http.authorizeRequests()
-				.antMatchers("/","index","/login","/login-error","/401","/css/**","/js/**","/user/login","/login/test","/api-c/**","/adminLogin","/error","/api/**").permitAll()
+				//放行的url
+				.antMatchers( "/css/**", "/js/**", "/error","/actuator/health").permitAll()
+				.antMatchers("/api/**o").access("permitAll")
 				.anyRequest().authenticated()
-				.and()
-				//loginPage/loginProcessingURL指登录的接口与默认登录界面
-				.formLogin().permitAll().loginProcessingUrl("/login")
 				.and().exceptionHandling().accessDeniedHandler(accessDeniedHandler()).authenticationEntryPoint(authenticationEntryPoint());
-
-
 	}
 
-	;
 
 	/**
 	 * 注册自定义的UsernamePasswordAuthenticationFilter
@@ -91,12 +98,10 @@ public class Config extends WebSecurityConfigurerAdapter {
 		filter.setAuthenticationSuccessHandler(new AuthenticationSuccessHandler() {
 			@Override
 			public void onAuthenticationSuccess(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Authentication authentication) throws IOException, ServletException {
-				httpServletResponse.setContentType("application/json;charset=utf-8");
-				JSONObject jsonObject = new JSONObject();
-				jsonObject.put("result", "success");
-				jsonObject.put("message", "登录成功");
+				httpServletResponse.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
 				PrintWriter out = httpServletResponse.getWriter();
-				out.write(jsonObject.toJSONString());
+				System.out.println("认证成功");
+				out.write(JSON.toJSONString(new SuccessModel("认证成功")));
 				out.flush();
 				out.close();
 			}
@@ -108,16 +113,12 @@ public class Config extends WebSecurityConfigurerAdapter {
 			@Override
 			public void onAuthenticationFailure(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, AuthenticationException e) throws IOException, ServletException {
 				httpServletResponse.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
-				JSONObject jsonObject = new JSONObject();
-				jsonObject.put("result", Constant.FAIL);
-				jsonObject.put("message", "登录失败，请重新登录");
 				PrintWriter out = httpServletResponse.getWriter();
-				out.write(jsonObject.toJSONString());
+				out.write(JSON.toJSONString(new FailModel("认证失败")));
 				out.flush();
 				out.close();
 			}
 		});
-		filter.setFilterProcessesUrl("/login");
 
 		//这句很关键，重用WebSecurityConfigurerAdapter配置的AuthenticationManager，不然要自己组装AuthenticationManager
 		filter.setAuthenticationManager(authenticationManagerBean());
@@ -126,7 +127,7 @@ public class Config extends WebSecurityConfigurerAdapter {
 
 
 	/**
-	 * 不允许访问控制器
+	 * 拒绝访问控制器
 	 *
 	 * @return AccessDeniedHandler
 	 */
@@ -137,7 +138,7 @@ public class Config extends WebSecurityConfigurerAdapter {
 			public void handle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, AccessDeniedException e) throws IOException, ServletException {
 				httpServletResponse.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
 				httpServletResponse.setStatus(HttpStatus.OK.value());
-				httpServletResponse.getWriter().write(new ObjectMapper().writeValueAsString(new BaseModel("fail", "无此权限")));
+				httpServletResponse.getWriter().write(new ObjectMapper().writeValueAsString(new BaseModel("fail", "403.无此权限")));
 			}
 		};
 	}
@@ -154,16 +155,37 @@ public class Config extends WebSecurityConfigurerAdapter {
 
 	/**
 	 * 自定义401返回结果
+	 *
 	 * @return
 	 */
-	public AuthenticationEntryPoint authenticationEntryPoint(){
+	public AuthenticationEntryPoint authenticationEntryPoint() {
 		return new AuthenticationEntryPoint() {
 			@Override
 			public void commence(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, AuthenticationException e) throws IOException, ServletException {
 				httpServletResponse.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
 				httpServletResponse.setStatus(HttpStatus.OK.value());
-				httpServletResponse.getWriter().write(new ObjectMapper().writeValueAsString(new BaseModel("fail", "认证信息失败")));
+				httpServletResponse.getWriter().write(new ObjectMapper().writeValueAsString(new BaseModel("fail", "401认证信息失败")));
 			}
 		};
+	}
+
+	/**
+	 * 跨域请求配置
+	 * @return CorsConfiguration
+	 */
+	@Bean
+	public CorsConfiguration buildConfig() {
+		CorsConfiguration corsConfiguration = new CorsConfiguration();
+		corsConfiguration.addAllowedOrigin("*");
+		corsConfiguration.addAllowedHeader("*");
+		corsConfiguration.addAllowedMethod("*");
+		return corsConfiguration;
+	}
+
+	@Bean
+	public CorsFilter corsFilter() {
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/**", buildConfig());
+		return new CorsFilter(source);
 	}
 }

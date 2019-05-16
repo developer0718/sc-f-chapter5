@@ -3,6 +3,8 @@ package com.netzoom.servicezuul.apimanager.security.service;
 import com.alibaba.fastjson.JSON;
 import com.netzoom.servicezuul.apimanager.model.Permission;
 import com.netzoom.servicezuul.apimanager.security.dao.PermissionDAO;
+import com.netzoom.servicezuul.apimanager.util.CommonUtil;
+import com.netzoom.servicezuul.apimanager.util.Constant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
+import java.util.regex.Pattern;
 
 import static com.netzoom.servicezuul.apimanager.util.Constant.ADMIN_LOGIN;
 import static com.netzoom.servicezuul.apimanager.util.Constant.LOGIN_URL;
@@ -34,7 +37,7 @@ public class MyInvocationSecurityMetadataSourceService implements FilterInvocati
 	/**
 	 * 每一个资源所需要的角色 Collection<ConfigAttribute>决策器会用到
 	 */
-	private static HashMap<String, Collection<ConfigAttribute>> map =null;
+	private static HashMap<String, Collection<ConfigAttribute>> map = null;
 
 	/**
 	 * 返回请求的资源需要的角色
@@ -47,7 +50,13 @@ public class MyInvocationSecurityMetadataSourceService implements FilterInvocati
 		}
 		//object 中包含用户请求的request 信息
 		HttpServletRequest request = ((FilterInvocation) object).getHttpRequest();
-		if (LOGIN_URL.equals(request.getRequestURL().toString())||ADMIN_LOGIN.equals(request.getRequestURL().toString()) ){
+		if (ADMIN_LOGIN.equals(request.getRequestURI())){
+			return null;
+		}
+		/**
+		 * 本地请求不走ss过滤器链
+		 */
+		if ( CommonUtil.StringMatcher(Constant.MVC_REQUEST_PATTERN,request.getRequestURI())){
 			return null;
 		}
 		for (Iterator<String> it = map.keySet().iterator(); it.hasNext();) {

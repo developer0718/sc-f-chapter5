@@ -26,10 +26,6 @@ import java.util.Iterator;
 public class MyAccessDecisionManager implements AccessDecisionManager {
 
 	private Logger logger = LoggerFactory.getLogger(getClass());
-
-	static {
-		System.out.println("MyAccessDecisionManager加载！");
-	}
 	/**
 	 * 通过传递的参数来决定用户是否有访问对应受保护对象的权限
 	 *
@@ -45,13 +41,19 @@ public class MyAccessDecisionManager implements AccessDecisionManager {
 			String needRole;
 			for(Iterator<ConfigAttribute> iterator = configAttributes.iterator(); iterator.hasNext(); ) {
 				needRole = iterator.next().getAttribute();
+
 				for(GrantedAuthority grantedAuthority : authentication.getAuthorities()) {
 					if(needRole.trim().equals(grantedAuthority.getAuthority().trim())) {
 						return;
 					}
+					else if ("ROLE_LOGIN".equals(grantedAuthority.getAuthority().trim())){
+						return;
+					}else {
+						throw new AccessDeniedException("当前访问没有权限");
+					}
 				}
 			}
-//			throw new AccessDeniedException("当前访问没有权限");
+
 		}
 	}
 

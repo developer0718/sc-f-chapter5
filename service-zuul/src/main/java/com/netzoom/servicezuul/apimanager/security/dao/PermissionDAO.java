@@ -168,4 +168,15 @@ public class PermissionDAO {
 		return baseDAO.delete(NS + "unAuthenticatedPermission", permission);
 	}
 
+	/**
+	 * 删除权限资源角色表记录
+	 *
+	 * @param permission (permissionId-权限id)
+	 * @return int 影响记录行数
+	 * @throws Exception mapper异常
+	 */
+	public int deletePermissionRole(Permission permission) throws Exception {
+		return baseDAO.delete(NS + "deletePermissionRole", permission);
+	}
+
 }

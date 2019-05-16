@@ -50,7 +50,7 @@ public class UserService {
 			return new BaseModel(Constant.SUCCESS, "新增服务用户成功");
 		} catch (Exception e) {
 			logger.error("新增服务用户失败" + e);
-			return new BaseModel(Constant.FAIL, "网络异常，新增服务用户失败");
+			return new BaseModel(Constant.FAIL, "网络异常，新增服务用户失败，请检查用户是否已存在");
 		}
 	}
 
@@ -174,7 +174,7 @@ public class UserService {
 			return new SuccessModel("新增角色成功");
 		} catch (Exception e) {
 			logger.error("新增角色失败" + e);
-			return new FailModel("网络异常，新增角色失败");
+			return new FailModel("网络异常，新增角色失败，请检查角色是否已存在");
 		}
 	}
 
@@ -214,7 +214,7 @@ public class UserService {
 			}
 		} catch (Exception e) {
 			logger.error("修改角色失败");
-			return new FailModel("网络异常，修改角色失败");
+			return new FailModel("网络异常，修改角色失败，请检查角色是否已存在");
 		}
 	}
 
@@ -352,6 +352,7 @@ public class UserService {
 	public BaseModel deletePermission(Permission permission) {
 		try {
 			int result = permissionDAO.deletePermission(permission);
+			permissionDAO.deletePermissionRole(permission);
 			//重新初始化所有资源对应的角色
 			metadataSourceService.loadResourceDefine();
 			if (result == 1) {
