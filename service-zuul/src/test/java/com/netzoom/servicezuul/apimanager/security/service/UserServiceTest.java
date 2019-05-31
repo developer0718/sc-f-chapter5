@@ -309,9 +309,10 @@ public class UserServiceTest {
 	@Test
 	public void updatePermission_success_test() throws Exception {
 		Permission permission = new Permission();
-		permission.setPermissionId("10babd3b37ea4393bc8039a3cf667464");
-		permission.setResource("/heiheiheiheihei");
+		permission.setPermissionId("as5ds6");
+		permission.setResource("/test/test/apisdsdsdsds2d");
 		permission.setUpdateUser("tanzj");
+		permission.setRoleList(new ArrayList<>());
 		CommonUtil.makeLogInfo(userService.updatePermission(permission));
 	}
 

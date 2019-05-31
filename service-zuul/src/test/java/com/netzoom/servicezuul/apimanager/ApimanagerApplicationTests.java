@@ -1,6 +1,7 @@
 package com.netzoom.servicezuul.apimanager;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.netzoom.servicezuul.apimanager.model.Permission;
 import com.netzoom.servicezuul.apimanager.model.User;
 import com.netzoom.servicezuul.apimanager.security.dao.PermissionDAO;
@@ -15,9 +16,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import java.util.List;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -104,6 +108,34 @@ public class ApimanagerApplicationTests {
 		logger.info("查询结果："+JSON.toJSONString(userService.queryAllPermission()));
 	}
 
+	/**
+	 * 判断请求资源是否存在数据库
+	 * @param uri 所请求的资源
+	 */
+	public Boolean judgeRequestExist(String uri) throws Exception {
+		Permission permission = new Permission();
+		permission.setResource(uri);
+		List<Permission> permissionList = permissionDAO.queryAllPermission();
+		if (!permissionList.contains(permission)) {
+			logger.debug("接口资源不存在!");
+			JSONObject responseData = new JSONObject();
+			JSONObject responseBody = new JSONObject();
+			JSONObject data = new JSONObject();
+			data.put("ServiceHttpCode", 404);
+			responseBody.put("success", "false");
+			responseBody.put("code", "199998");
+			responseBody.put("msg", "接口资源不存在");
+			responseBody.put("data", data);
+			responseData.put("body", responseBody);
+			return false;
+		} else {
+			return true;
+		}
+	}
 
+	@Test
+	public void test() throws Exception {
+		System.out.println("存在状态"+judgeRequestExist("/account/api/v1/GetUserAccountInfo"));
+	}
 
 }

@@ -48,12 +48,10 @@ public class MyAccessDecisionManager implements AccessDecisionManager {
 					}
 					else if ("ROLE_LOGIN".equals(grantedAuthority.getAuthority().trim())){
 						return;
-					}else {
-						throw new AccessDeniedException("当前访问没有权限");
 					}
 				}
 			}
-
+			throw new AccessDeniedException("当前访问没有权限");
 		}
 	}
 

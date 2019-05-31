@@ -83,7 +83,7 @@ public class Config extends WebSecurityConfigurerAdapter {
 		http.authorizeRequests()
 				//放行的url
 				.antMatchers( "/css/**", "/js/**", "/error","/actuator/health").permitAll()
-				.antMatchers("/api/**o").access("permitAll")
+				.antMatchers("/api/**").access("permitAll")
 				.anyRequest().authenticated()
 				.and().exceptionHandling().accessDeniedHandler(accessDeniedHandler()).authenticationEntryPoint(authenticationEntryPoint());
 	}

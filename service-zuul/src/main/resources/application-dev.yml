@@ -2,7 +2,7 @@ server:
   port: 9769
   servlet:
     session:
-      timeout: 30m
+      timeout: 1s
   tomcat.uri-encoding: utf-8
 spring:
   application:
@@ -41,6 +41,14 @@ zuul:
     authentication:
       path: /authentication/**
       serviceId: authenticationMS
+    order:
+      path: /order/**
+      serviceId: ISP_ORDERSERVICE
+    pay:
+      path: /pay/**
+      serviceId: ISP_PAYMENTSERVICE
+
+
 
 mybatis:
   mapper-locations: classpath:sqlclient/*.xml

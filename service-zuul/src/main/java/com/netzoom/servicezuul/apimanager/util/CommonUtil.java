@@ -29,7 +29,7 @@ public class CommonUtil {
 	}
 
 	/**
-	 * 字符串通配方法
+	 * 字符串通配方法,只能匹配/api/* 类型
 	 * @param patternString 通配符 如/api/*
 	 * @param content 需要匹配的内容 如/api/test
 	 * @return boolean

@@ -1,7 +1,9 @@
 server:
   port: 9769
-  session-timeout: 30
   tomcat.uri-encoding: utf-8
+  servlet:
+    session:
+      timeout: 10s
 spring:
   application:
     name: service-zuul

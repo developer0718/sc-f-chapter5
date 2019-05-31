@@ -35,5 +35,8 @@ public class Constant {
 	 */
 	public static String SALT = "ISP";
 
+	/**
+	 * mvc请求通配
+	 */
 	public static String MVC_REQUEST_PATTERN = "/api/*";
 }

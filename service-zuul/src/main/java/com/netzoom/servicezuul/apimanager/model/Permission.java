@@ -4,6 +4,7 @@ import com.alibaba.fastjson.annotation.JSONField;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 public class Permission {
 
@@ -55,13 +56,13 @@ public class Permission {
 	/**
 	 * 创建时间
 	 */
-	@JSONField(format="yyyy-MM-dd HH:mm:ss")
+	@JSONField(format = "yyyy-MM-dd HH:mm:ss")
 	private Date createTime;
 
 	/**
 	 * 更新时间
 	 */
-	@JSONField(format="yyyy-MM-dd HH:mm:ss")
+	@JSONField(format = "yyyy-MM-dd HH:mm:ss")
 	private Date updateTime;
 
 	/**
@@ -199,5 +200,22 @@ public class Permission {
 
 	public void setRoleList(List<Role> roleList) {
 		this.roleList = roleList;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		Permission that = (Permission) o;
+		return Objects.equals(resource, that.resource);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(resource);
 	}
 }

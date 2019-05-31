@@ -82,7 +82,7 @@ public class UserService {
 			permissionDAO.insertPermission(permission);
 			return new SuccessModel("添加权限成功");
 		} catch (Exception e) {
-			return new FailModel("网络异常，添加权限失败");
+			return new FailModel("添加资源失败,请检查该资源接口是否存在");
 		}
 	}
 
@@ -206,9 +206,9 @@ public class UserService {
 		try {
 			int result = roleDAO.editRole(role);
 			if (result == 1) {
+				metadataSourceService.loadResourceDefine();
 				return new SuccessModel("修改角色成功");
 			} else {
-
 				logger.error("修改角色失败，影响" + result + "条记录");
 				return new FailModel("修改角色失败");
 			}
@@ -468,20 +468,25 @@ public class UserService {
 	 */
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
 	public BaseModel updatePermission(Permission permission) throws Exception {
-		//删除现有接口角色
-		permissionDAO.unAuthenticatedPermission(permission);
-		//为接口授予角色
-		for (Role role : permission.getRoleList()) {
-			role.setPermissionId(permission.getPermissionId());
-			permissionDAO.insertRolePermission(role);
-		}
-		int affectRows = permissionDAO.updatePermission(permission);
-		if (affectRows == 1) {
-			//重新加载资源
-			metadataSourceService.loadResourceDefine();
-			return new SuccessModel("更新成功");
-		} else {
-			throw new Exception("影响多条记录，更新失败");
+		List<Permission> currentPermissionList = permissionDAO.queryAllPermission();
+		if (currentPermissionList.contains(permission)){
+			return new FailModel("接口已经存在");
+		}else {
+			//删除现有接口角色
+			permissionDAO.unAuthenticatedPermission(permission);
+			//为接口授予角色
+			for (Role role : permission.getRoleList()) {
+				role.setPermissionId(permission.getPermissionId());
+				permissionDAO.insertRolePermission(role);
+			}
+			int affectRows = permissionDAO.updatePermission(permission);
+			if (affectRows == 1) {
+				//重新加载资源
+				metadataSourceService.loadResourceDefine();
+				return new SuccessModel("更新成功");
+			} else {
+				throw new Exception("影响多条记录，更新失败");
+			}
 		}
 
 	}
